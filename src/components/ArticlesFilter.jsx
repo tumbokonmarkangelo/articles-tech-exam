@@ -1,6 +1,5 @@
 import { Form } from "react-router-dom";
 import { getFormData } from "../utilities";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function ArticlesFilter(props = { onFilter: () => {} }) {
   const { onFilter } = props;

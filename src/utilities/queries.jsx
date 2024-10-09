@@ -11,7 +11,7 @@ export const GetAllUsers = () => {
 export const GetAllArticles = (props = { page: 1, limit: 12, params: {} }) => {
   const { page, limit, params } = props;
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const query = useQuery("articles", async () => {
     const response = await fetch(
@@ -26,18 +26,29 @@ export const GetAllArticles = (props = { page: 1, limit: 12, params: {} }) => {
     return response.json();
   });
 
-
-  const mutation = useMutation(()=>{
-    
-  }, {
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries('todos')
+  const mutation = useMutation(
+    async (payload) => {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts",
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        }
+      );
+      return response.json();
     },
-  })
+    {
+      onSuccess: () => {
+        // Invalidate and refetch
+        queryClient.invalidateQueries("todos");
+      },
+    }
+  );
 
-  console.log('query', query)
-  return query;
+  return { query, mutation };
 };
 
 export const CreateArticle = (article) => {

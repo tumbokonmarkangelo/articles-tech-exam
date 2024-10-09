@@ -6,7 +6,7 @@ import ArticlesFilter from "../components/ArticlesFilter";
 
 const Articles = () => {
   const { articles, setArticles } = useArticlesStore();
-  const { data, isLoading, isError } = GetAllArticles();
+  const { data, isLoading, isError } = GetAllArticles().query;
 
   useEffect(() => {
     if (data && !isLoading && !isError) setArticles(data);
