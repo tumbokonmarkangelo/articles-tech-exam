@@ -9,6 +9,7 @@ import Articles from "./pages/Articles";
 import Layout from "./components/Layout";
 import LayoutProtected from "./components/LayoutProtected";
 import { QueryClient, QueryClientProvider } from "react-query";
+import MyArticles from "./pages/MyArticles";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
           {
             path: "articles",
             element: <Articles />,
+          },
+          {
+            path: "manage-articles",
+            element: <MyArticles />,
           },
         ],
       },

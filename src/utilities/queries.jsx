@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-export const GetAllUsers = () => {
+export const UsersQueries = () => {
   const query = useQuery("users", async () => {
     const response = await fetch("https://jsonplaceholder.typicode.com/users");
     return response.json();
@@ -8,25 +9,57 @@ export const GetAllUsers = () => {
   return query;
 };
 
-export const GetAllArticles = (props = { page: 1, limit: 12, params: {} }) => {
-  const { page, limit, params } = props;
+export const ArticlesQueries = (props = { params: {} }) => {
+  const [params, setParams] = useState({
+    ...props?.params,
+    _page: props?.page ?? 1,
+    _limit: props?.limit ?? 100,
+  });
+
+  const getArticles = async (props) => {
+    console.log("params", props.newParams);
+    const response = await fetch(
+      "https://jsonplaceholder.typicode.com/posts?" +
+        new URLSearchParams(props?.newParams ?? params).toString()
+    );
+    // console.log("Total Articles:", response.headers.get("X-Total-Count") ?? 0);
+    return response.json();
+  };
 
   const queryClient = useQueryClient();
 
-  const query = useQuery("articles", async () => {
-    const response = await fetch(
-      "https://jsonplaceholder.typicode.com/posts?" +
-        new URLSearchParams({
-          ...params,
-          _page: page,
-          _limit: limit,
-        }).toString()
-    );
-    console.log("Total Articles:", response.headers.get("X-Total-Count") ?? 0);
-    return response.json();
+  const query = useQuery({
+    initialData: [],
+    queryKey: ["articles"],
+    queryFn: getArticles,
   });
 
-  const mutation = useMutation(
+  const refetchMutation = useMutation({
+    mutationKey: ["articles"],
+    mutationFn: getArticles,
+    onSuccess: (data) => {
+      queryClient.setQueryData("articles", data);
+    },
+  });
+
+  const updateParams = async (params) => {
+    const newParams = {
+      ...props?.params,
+      ...params,
+      _page: props?.page ?? 1,
+      _limit: props?.limit ?? 100,
+    };
+    setParams(newParams);
+    refetchMutation.mutate({ newParams });
+  };
+
+  return { query, updateParams };
+};
+
+export const ArticleQueries = () => {
+  const queryClient = useQueryClient();
+
+  const postMutation = useMutation(
     async (payload) => {
       const response = await fetch(
         "https://jsonplaceholder.typicode.com/posts",
@@ -41,56 +74,36 @@ export const GetAllArticles = (props = { page: 1, limit: 12, params: {} }) => {
       return response.json();
     },
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
         // Invalidate and refetch
-        queryClient.invalidateQueries("todos");
+        console.log("Post response:", data);
+        queryClient.invalidateQueries("articles");
       },
     }
   );
 
-  return { query, mutation };
-};
-
-export const CreateArticle = (article) => {
-  const query = useQuery("article", async () => {
-    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
-      method: "POST",
-      body: JSON.stringify(article),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
+  const updateMutation = useMutation(
+    async (payload) => {
+      const response = await fetch(
+        `https://jsonplaceholder.typicode.com/posts/${payload.id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(payload),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        }
+      );
+      return response.json();
+    },
+    {
+      onSuccess: (data) => {
+        // Invalidate and refetch
+        console.log("Update response:", data);
+        queryClient.invalidateQueries("articles");
       },
-    });
-    return response.json();
-  });
-  return query;
-};
+    }
+  );
 
-export const UpdateArticle = (article) => {
-  const query = useQuery("article", async () => {
-    const response = await fetch(
-      `https://jsonplaceholder.typicode.com/posts/${article.id}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(article),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-      }
-    );
-    return response.json();
-  });
-  return query;
-};
-
-export const DeleteArticle = (article) => {
-  const query = useQuery("article", async () => {
-    const response = await fetch(
-      `https://jsonplaceholder.typicode.com/posts/${article.id}`,
-      {
-        method: "DELETE",
-      }
-    );
-    return response.json();
-  });
-  return query;
+  return { postMutation, updateMutation };
 };

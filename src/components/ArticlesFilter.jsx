@@ -9,7 +9,7 @@ export default function ArticlesFilter(props = { onFilter: () => {} }) {
         const values = getFormData(e.currentTarget);
         onFilter(values);
       }}
-      className="flex flex-wrap gap-5 max-w-[400px]"
+      className="flex flex-wrap gap-5 max-w-[560px]"
     >
       <input
         type="text"
@@ -20,11 +20,11 @@ export default function ArticlesFilter(props = { onFilter: () => {} }) {
       />
       <select
         name="type"
-        className="flex-[0_0_20%] placeholder-gray-400 px-2 border border-black rounded"
+        className="flex-1 sm:flex-[0_0_20%] placeholder-gray-400 px-2 border border-black rounded"
       >
-        <option value="id">ID</option>
-        <option value="userId">UserId</option>
-        <option value="title">Title</option>
+        <option value="title">Search by Title</option>
+        <option value="id">Search by ID</option>
+        <option value="userId">Search by UserId</option>
       </select>
     </Form>
   );

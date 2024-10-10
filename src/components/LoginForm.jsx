@@ -1,25 +1,25 @@
 import { Form, useNavigate } from "react-router-dom";
 import { getFormData } from "../utilities";
 import { useUserStore } from "../hooks/user";
-import { GetAllUsers } from "../utilities/queries";
+import { useUsersStore } from "../hooks/users";
 
 export default function LoginForm() {
   const navigate = useNavigate();
   const { setUser } = useUserStore();
-  const { data, isLoading, isError } = GetAllUsers();
+  const { users } = useUsersStore();
 
   return (
     <Form
       onSubmit={(e) => {
         e.preventDefault();
         const values = getFormData(e.target);
-        const user = data.filter((user) => {
+        const user = users.filter((user) => {
           return user.username === values.username &&
             user.email === values.email
             ? true
             : false;
         })[0];
-        if (data && user) {
+        if (users && user) {
           setUser(user);
           console.log("user", user);
           return navigate("/articles");
@@ -42,7 +42,6 @@ export default function LoginForm() {
         required
       />
       <button
-        disabled={isLoading || isError}
         type="submit"
         className="border rounded px-5 bg-blue-950 disabled:bg-gray-500 text-white hover:bg-white hover:text-black hover:border-black transition duration-300"
       >

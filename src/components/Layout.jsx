@@ -2,12 +2,24 @@ import { Outlet, Link } from "react-router-dom";
 import logo from "../logo.svg";
 import { useUserStore } from "../hooks/user";
 import UserDropdown from "./UserDropdown";
+import { useUsersStore } from "../hooks/users";
+import { UsersQueries } from "../utilities/queries";
+import { useEffect } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Layout() {
   const { user } = useUserStore();
+  const { setUsers } = useUsersStore();
+  const { data, isLoading, isError } = UsersQueries();
+
+  useEffect(() => {
+    if (data && !isLoading && !isError) setUsers(data);
+  }, [data, isLoading, isError, setUsers]);
 
   return (
     <>
+      <ToastContainer />
       <div
         id="nav"
         className="px-3 py-5 flex justify-between items-center bg-gray-100 shadow-gray-300 shadow-sm"
